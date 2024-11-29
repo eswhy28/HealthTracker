@@ -1,0 +1,65 @@
+[
+    {
+        "user_id": "12345",
+        "date": "2024-10-01",
+        "duration": 6.0,
+        "disturbances": 3,
+        "sleep_quality": 65.0
+    },
+    {
+        "user_id": "12345",
+        "date": "2024-10-08",
+        "duration": 6.3,
+        "disturbances": 2,
+        "sleep_quality": 70.0
+    },
+    {
+        "user_id": "12345",
+        "date": "2024-10-15",
+        "duration": 6.6,
+        "disturbances": 2,
+        "sleep_quality": 72.0
+    },
+    {
+        "user_id": "12345",
+        "date": "2024-10-22",
+        "duration": 6.9,
+        "disturbances": 1,
+        "sleep_quality": 75.0
+    },
+    {
+        "user_id": "12345",
+        "date": "2024-10-29",
+        "duration": 7.1,
+        "disturbances": 1,
+        "sleep_quality": 80.0
+    },
+    {
+        "user_id": "12345",
+        "date": "2024-11-05",
+        "duration": 7.3,
+        "disturbances": 1,
+        "sleep_quality": 82.0
+    },
+    {
+        "user_id": "12345",
+        "date": "2024-11-12",
+        "duration": 7.0,
+        "disturbances": 2,
+        "sleep_quality": 78.0
+    },
+    {
+        "user_id": "12345",
+        "date": "2024-11-21",
+        "duration": 7.2,
+        "disturbances": 1,
+        "sleep_quality": 85.0
+    },
+    {
+        "user_id": "12345",
+        "date": "2024-11-22",
+        "duration": 6.5,
+        "disturbances": 2,
+        "sleep_quality": 75.0
+    }
+]
