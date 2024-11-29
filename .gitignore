@@ -1,3 +1,5 @@
 node_modules/
 venv/
 db.sqlite
+tree_limited.sh
+db.sqlite3
