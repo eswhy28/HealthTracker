@@ -5,11 +5,12 @@ import {
   Typography, 
   Paper, 
   Box, 
-  CircularProgress ,
-  TextField
+  CircularProgress,
+  TextField,
+  Stack
 } from '@mui/material';
 import { motion } from 'framer-motion';
-import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import moment from 'moment';
@@ -32,10 +33,8 @@ const HealthDashboard = () => {
   const [sleep, setSleep] = useState([]);
   const [journal, setJournal] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState([
-    moment().subtract(7, 'days'), 
-    moment()
-  ]);
+  const [startDate, setStartDate] = useState(moment().subtract(7, 'days'));
+  const [endDate, setEndDate] = useState(moment());
 
   const loadHealthData = async () => {
     try {
@@ -46,18 +45,18 @@ const HealthDashboard = () => {
         sleepData, 
         journalData
       ] = await Promise.all([
-        fetchHealthInsights(dateRange[0], dateRange[1]),
+        fetchHealthInsights(startDate, endDate),
         fetchMetrics({ 
-          start_date: dateRange[0].format('YYYY-MM-DD'), 
-          end_date: dateRange[1].format('YYYY-MM-DD') 
+          start_date: startDate.format('YYYY-MM-DD'), 
+          end_date: endDate.format('YYYY-MM-DD') 
         }),
         fetchSleep({ 
-          start_date: dateRange[0].format('YYYY-MM-DD'), 
-          end_date: dateRange[1].format('YYYY-MM-DD') 
+          start_date: startDate.format('YYYY-MM-DD'), 
+          end_date: endDate.format('YYYY-MM-DD') 
         }),
         fetchJournal({ 
-          start_date: dateRange[0].format('YYYY-MM-DD'), 
-          end_date: dateRange[1].format('YYYY-MM-DD') 
+          start_date: startDate.format('YYYY-MM-DD'), 
+          end_date: endDate.format('YYYY-MM-DD') 
         })
       ]);
 
@@ -74,7 +73,7 @@ const HealthDashboard = () => {
 
   useEffect(() => {
     loadHealthData();
-  }, []);
+  }, [startDate, endDate]);
 
   if (loading) {
     return (
@@ -111,20 +110,18 @@ const HealthDashboard = () => {
               <Typography variant="h4" fontWeight="bold">
                 Personal Health Dashboard
               </Typography>
-              <DateRangePicker
-                value={dateRange}
-                onChange={(newValue) => {
-                  setDateRange(newValue);
-                  loadHealthData();
-                }}
-                renderInput={(startProps, endProps) => (
-                  <>
-                    <TextField {...startProps} />
-                    <Box sx={{ mx: 2 }}> to </Box>
-                    <TextField {...endProps} />
-                  </>
-                )}
-              />
+              <Stack direction="row" spacing={2} alignItems="center">
+                <DatePicker
+                  label="Start Date"
+                  value={startDate}
+                  onChange={(newValue) => setStartDate(newValue)}
+                />
+                <DatePicker
+                  label="End Date"
+                  value={endDate}
+                  onChange={(newValue) => setEndDate(newValue)}
+                />
+              </Stack>
             </Box>
 
             <Grid container spacing={3}>
@@ -138,7 +135,7 @@ const HealthDashboard = () => {
                 <HealthCharts 
                   metrics={metrics}
                   sleep={sleep}
-                  journal={journal}
+                  journal={insights}
                 />
               </Grid>
               <Grid item xs={12} md={4}>

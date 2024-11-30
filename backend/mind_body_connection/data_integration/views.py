@@ -163,14 +163,12 @@ def custom_json_encoder(obj):
 
 class HealthInsightsView(APIView):
     def get(self, request):
-
         # Extract query parameters
         duration = request.query_params.get('duration', 'weekly')
         user_id = request.query_params.get('user_id')
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         agent = request.query_params.get('agent')
-
 
         # Base querysets
         health_metrics = HealthMetric.objects.all()
@@ -188,7 +186,6 @@ class HealthInsightsView(APIView):
             try:
                 start_date = timezone.datetime.strptime(start_date, '%Y-%m-%d').date()
                 end_date = timezone.datetime.strptime(end_date, '%Y-%m-%d').date()
-
                 health_metrics = health_metrics.filter(date__range=[start_date, end_date])
                 sleep_data = sleep_data.filter(date__range=[start_date, end_date])
                 journal_entries = journal_entries.filter(date__range=[start_date, end_date])
@@ -198,24 +195,10 @@ class HealthInsightsView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-        # Apply duration-based filtering
-        if duration == 'daily':
-            health_metrics = health_metrics.filter(date__gte=timezone.now().date() - timezone.timedelta(days=1))
-            sleep_data = sleep_data.filter(date__gte=timezone.now().date() - timezone.timedelta(days=1))
-            journal_entries = journal_entries.filter(date__gte=timezone.now().date() - timezone.timedelta(days=1))
-        elif duration == 'weekly':
-            health_metrics = health_metrics.filter(date__gte=timezone.now().date() - timezone.timedelta(days=7))
-            sleep_data = sleep_data.filter(date__gte=timezone.now().date() - timezone.timedelta(days=7))
-            journal_entries = journal_entries.filter(date__gte=timezone.now().date() - timezone.timedelta(days=7))
-        elif duration == 'monthly':
-            health_metrics = health_metrics.filter(date__gte=timezone.now().date() - timezone.timedelta(days=30))
-            sleep_data = sleep_data.filter(date__gte=timezone.now().date() - timezone.timedelta(days=30))
-            journal_entries = journal_entries.filter(date__gte=timezone.now().date() - timezone.timedelta(days=30))
-
         # Validate data availability
-        if not health_metrics.exists() or not sleep_data.exists():
+        if not health_metrics.exists():
             return Response(
-                {"message": "No health data available for the specified criteria"},
+                {"message": "No health metrics available for the specified criteria"},
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -226,15 +209,22 @@ class HealthInsightsView(APIView):
             # If a specific agent is requested, return its insights
             if agent:
                 if agent.lower() == 'fitness':
-                    return Response(insights_generator.generate_fitness_insights())
+                    insights = insights_generator.generate_fitness_insights()
                 elif agent.lower() == 'sleep':
-                    return Response(insights_generator.generate_sleep_insights())
+                    insights = insights_generator.generate_sleep_insights()
                 elif agent.lower() == 'journal':
-                    return Response(insights_generator.analyze_journal_sentiments())
+                    insights = insights_generator.analyze_journal_sentiments()
+                else:
+                    return Response(
+                        {"error": "Invalid agent specified"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                # Otherwise, return full holistic insights
+                insights = insights_generator.generate_holistic_insights()
 
-            # Otherwise, return full holistic insights
-            insights = insights_generator.generate_holistic_insights()
             return Response(json.loads(json.dumps(insights, default=custom_json_encoder)))
+
         except Exception as e:
             return Response(
                 {"error": str(e)},
